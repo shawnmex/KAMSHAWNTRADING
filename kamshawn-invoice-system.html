@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KAMSHAWN — Invoice Management System</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=Montserrat:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ════════════════════════════════════════════
+   THEME TOKENS — DARK MODE (default)
+════════════════════════════════════════════ */
+:root,[data-theme="dark"] {
+  --bg:#06080d; --surface:#0f1219; --surface2:#161b26; --surface3:#1d2336;
+  --border:#252e48; --border2:#141b2e;
+  --gold:#c9a84c; --gold2:#e8c969; --gold-dim:rgba(201,168,76,.1); --gold-line:rgba(201,168,76,.22);
+  --red:#e05555; --green:#2dcc96; --amber:#f0a940;
+  --text:#edf0f8; --text2:#8390ae; --text3:#404d6e;
+  --font-display:'Cormorant Garamond',serif; --font-ui:'Montserrat',sans-serif; --font-mono:'DM Mono',monospace;
+  --radius:10px; --shadow:0 16px 56px rgba(0,0,0,.55);
+  --sidebar-w:226px;
+}
+/* ── LIGHT MODE ── */
+[data-theme="light"] {
+  --bg:#f2f0eb; --surface:#ffffff; --surface2:#f7f5f0; --surface3:#ede9e0;
+  --border:#d8d0bc; --border2:#e8e2d6;
+  --gold:#9a6e1e; --gold2:#c9a84c; --gold-dim:rgba(154,110,30,.08); --gold-line:rgba(154,110,30,.2);
+  --red:#c0392b; --green:#1a8c63; --amber:#c07800;
+  --text:#1a1612; --text2:#5a5040; --text3:#a09070;
+  --shadow:0 8px 32px rgba(0,0,0,.12);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--text);font-family:var(--font-ui);font-size:13px;overflow-x:hidden;transition:background .3s,color .3s}
+
+/* ── LAYOUT ── */
+.app{display:flex;height:100vh;overflow:hidden}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:var(--sidebar-w);min-width:var(--sidebar-w);
+  background:var(--surface);border-right:1px solid var(--border2);
+  display:flex;flex-direction:column;transition:background .3s,border .3s;
+}
+.logo-block{
+  padding:24px 20px 18px;border-bottom:1px solid var(--border2);
+  position:relative;overflow:hidden;
+}
+.logo-block::after{
+  content:'';position:absolute;bottom:0;left:20px;right:20px;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+}
+.logo-row{display:flex;align-items:center;gap:11px}
+.logo-gem{
+  width:40px;height:40px;border-radius:9px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--gold2) 0%,#8a5e10 100%);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 18px rgba(201,168,76,.3);
+}
+.logo-gem svg{width:22px;height:22px;color:#fff}
+.logo-name{font-family:var(--font-display);font-size:21px;font-weight:700;letter-spacing:1.5px;line-height:1}
+.logo-name b{color:var(--gold)}
+.logo-tag{font-size:8.5px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-top:2px}
+.logo-sub{font-size:10px;color:var(--text3);margin-top:6px}
+
+.nav{flex:1;padding:10px 0;overflow-y:auto}
+.nav-sec{padding:14px 18px 5px;font-size:8.5px;color:var(--text3);letter-spacing:2.5px;text-transform:uppercase;font-weight:700}
+.nav-item{
+  display:flex;align-items:center;gap:11px;padding:9px 18px;
+  cursor:pointer;transition:all .14s;color:var(--text2);font-size:12.5px;font-weight:500;
+  border-left:2.5px solid transparent;
+}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{background:var(--gold-dim);color:var(--gold);border-left-color:var(--gold)}
+.nav-item svg{width:15px;height:15px;flex-shrink:0}
+
+/* ── MAIN ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;background:var(--bg);transition:background .3s}
+
+.topbar{
+  height:56px;min-height:56px;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 24px;border-bottom:1px solid var(--border2);
+  background:var(--surface);transition:background .3s,border .3s;
+}
+.page-title{font-family:var(--font-display);font-size:22px;font-weight:600;letter-spacing:.5px}
+.topbar-right{display:flex;gap:8px;align-items:center}
+
+/* ── THEME TOGGLE ── */
+.theme-toggle{
+  display:flex;align-items:center;gap:0;
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:8px;overflow:hidden;
+}
+.theme-btn{
+  display:flex;align-items:center;gap:5px;padding:6px 12px;cursor:pointer;
+  font-size:11px;font-weight:600;font-family:var(--font-ui);
+  border:none;background:transparent;color:var(--text2);
+  transition:all .15s;letter-spacing:.3px;
+}
+.theme-btn.active{background:var(--gold-dim);color:var(--gold)}
+.theme-btn svg{width:13px;height:13px}
+
+/* ── BUTTONS ── */
+.btn{
+  display:inline-flex;align-items:center;gap:6px;padding:7px 15px;
+  border-radius:7px;border:none;cursor:pointer;
+  font-family:var(--font-ui);font-size:11.5px;font-weight:600;letter-spacing:.3px;transition:all .15s;
+}
+.btn svg{width:13px;height:13px}
+.btn-gold{background:linear-gradient(135deg,var(--gold2),#8a5e10);color:#fff;box-shadow:0 3px 14px rgba(201,168,76,.25)}
+.btn-gold:hover{filter:brightness(1.1)}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border)}
+.btn-ghost:hover{background:var(--surface2);color:var(--text)}
+.btn-danger{background:rgba(224,85,85,.1);color:var(--red);border:1px solid rgba(224,85,85,.2)}
+.btn-danger:hover{background:rgba(224,85,85,.18)}
+.btn-success{background:rgba(45,204,150,.1);color:var(--green);border:1px solid rgba(45,204,150,.2)}
+.btn-success:hover{background:rgba(45,204,150,.18)}
+
+/* ── CONTENT ── */
+.content{flex:1;overflow:auto;padding:20px 24px}
+.page{display:none}
+.page.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+.page.active>*{animation:fadeUp .22s ease}
+
+/* ── STATS ── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-bottom:20px}
+.stat-card{
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:var(--radius);padding:17px;position:relative;overflow:hidden;
+  transition:background .3s,border .3s;
+}
+.stat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:2.5px}
+.stat-card.gold::after{background:linear-gradient(90deg,var(--gold),var(--gold2))}
+.stat-card.green::after{background:var(--green)}
+.stat-card.amber::after{background:var(--amber)}
+.stat-card.red::after{background:var(--red)}
+.stat-lbl{font-size:9px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-bottom:7px}
+.stat-val{font-family:var(--font-mono);font-size:20px;font-weight:500}
+.stat-sub{font-size:10px;color:var(--text3);margin-top:4px}
+
+/* ── TABLE ── */
+.table-wrap{background:var(--surface);border:1px solid var(--border2);border-radius:var(--radius);overflow:hidden;transition:background .3s,border .3s}
+.table-hdr{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border2)}
+.table-ttl{font-family:var(--font-display);font-size:16px;font-weight:600}
+table{width:100%;border-collapse:collapse}
+thead th{
+  background:var(--surface2);padding:10px 15px;text-align:left;
+  font-size:9px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;font-weight:700;
+  border-bottom:1px solid var(--border2);transition:background .3s;
+}
+tbody tr{border-bottom:1px solid var(--border2);transition:background .1s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--surface2)}
+tbody td{padding:11px 15px;vertical-align:middle}
+.mono{font-family:var(--font-mono)}
+
+.badge{display:inline-flex;align-items:center;padding:3px 8px;border-radius:4px;font-size:10px;font-weight:700;letter-spacing:.5px}
+.badge-gold{background:var(--gold-dim);color:var(--gold)}
+.badge-green{background:rgba(45,204,150,.1);color:var(--green)}
+.badge-amber{background:rgba(240,169,64,.1);color:var(--amber)}
+.badge-red{background:rgba(224,85,85,.1);color:var(--red)}
+.badge-blue{background:rgba(79,142,247,.1);color:#6fa3ff}
+
+/* ── MODALS ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;backdrop-filter:blur(5px);align-items:center;justify-content:center}
+.overlay.open{display:flex}
+.modal{
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  width:92%;max-width:980px;max-height:93vh;overflow:auto;padding:28px;
+  position:relative;box-shadow:var(--shadow);transition:background .3s,border .3s;
+}
+.modal-sm{max-width:500px}
+.modal-ttl{font-family:var(--font-display);font-size:22px;font-weight:700;margin-bottom:4px}
+.modal-sub{font-size:11px;color:var(--text2);margin-bottom:22px;letter-spacing:.3px}
+.modal-close{
+  position:absolute;top:16px;right:16px;background:var(--surface2);border:none;
+  color:var(--text2);width:30px;height:30px;border-radius:6px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:17px;transition:all .15s;
+}
+.modal-close:hover{background:var(--surface3);color:var(--text)}
+
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-group.full{grid-column:1/-1}
+label{font-size:10px;color:var(--text2);font-weight:700;letter-spacing:.8px;text-transform:uppercase}
+input,select,textarea{
+  background:var(--surface2);border:1px solid var(--border);border-radius:7px;
+  color:var(--text);padding:8px 11px;font-family:var(--font-ui);font-size:13px;
+  outline:none;transition:border .15s,background .3s;
+}
+input:focus,select:focus,textarea:focus{border-color:var(--gold)}
+select option{background:var(--surface2)}
+textarea{resize:vertical;min-height:60px}
+
+/* ── INVOICE EDITOR ── */
+.inv-hdr-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px}
+.inv-block{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:15px;transition:background .3s}
+.inv-block h4{font-size:8.5px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;font-weight:700;margin-bottom:10px}
+.items-tbl-wrap{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;overflow:hidden;margin-bottom:14px;transition:background .3s}
+.items-tbl{width:100%;border-collapse:collapse}
+.items-tbl th{padding:9px 11px;text-align:left;font-size:9px;color:var(--text3);letter-spacing:1.5px;text-transform:uppercase;background:var(--surface3);border-bottom:1px solid var(--border2);font-weight:700}
+.items-tbl td{padding:6px 9px;border-bottom:1px solid var(--border2);vertical-align:middle}
+.items-tbl tr:last-child td{border-bottom:none}
+.items-tbl input,.items-tbl select{background:transparent;border:1px solid transparent;padding:5px 7px;width:100%;border-radius:5px}
+.items-tbl input:focus,.items-tbl select:focus{background:var(--surface);border-color:var(--gold)}
+.inv-totals-box{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:15px;margin-left:auto;width:285px;transition:background .3s}
+.tot-row{display:flex;justify-content:space-between;padding:5px 0;font-size:13px}
+.tot-row.grand{border-top:1px solid var(--gold-line);margin-top:7px;padding-top:9px;font-weight:700;font-size:15px;color:var(--gold);font-family:var(--font-mono)}
+.inv-act-row{display:flex;justify-content:flex-end;gap:8px;margin-top:16px;flex-wrap:wrap}
+
+/* ── TOOLBAR ── */
+.toolbar{display:flex;gap:8px;align-items:center;margin-bottom:15px;flex-wrap:wrap}
+.search-wrap{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:8px 12px;display:flex;gap:8px;align-items:center;flex:1;min-width:200px;
+  transition:background .3s;
+}
+.search-wrap input{background:none;border:none;color:var(--text);flex:1;padding:0;font-size:13px}
+.search-wrap svg{color:var(--text3);width:14px;height:14px;flex-shrink:0}
+
+/* ── DROP ZONE ── */
+.drop-zone{border:2px dashed var(--border);border-radius:10px;padding:38px;text-align:center;cursor:pointer;transition:all .2s;color:var(--text3)}
+.drop-zone:hover,.drop-zone.drag{border-color:var(--gold);color:var(--text2);background:var(--gold-dim)}
+
+/* ── CLIENT PREVIEW ── */
+#clientPreview{background:var(--surface3);border:1px solid var(--border2);border-radius:7px;padding:10px;margin-top:8px;font-size:12px;color:var(--text2);display:none}
+.prev-row{display:flex;justify-content:space-between;padding:2px 0}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:22px;right:22px;background:var(--surface3);border:1px solid var(--border);border-radius:8px;padding:11px 17px;font-size:13px;color:var(--text);box-shadow:var(--shadow);z-index:999;display:none}
+.toast.show{display:flex;align-items:center;gap:8px}
+.toast.ok{border-left:3px solid var(--green)}
+.toast.err{border-left:3px solid var(--red)}
+
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px}
+
+.section-div{border:none;border-top:1px solid var(--border2);margin:18px 0}
+.tag-gold{color:var(--gold);font-family:var(--font-mono);font-size:11px}
+
+/* ════════════════════════════════════════════
+   LUXURY PRINT INVOICE
+════════════════════════════════════════════ */
+@media print{
+  body,html{background:#fff!important}
+  .app,.overlay:not(#printModal){display:none!important}
+  #printModal{display:flex!important;position:static!important;background:none!important;backdrop-filter:none!important}
+  .print-toolbar{display:none!important}
+  .luxury-invoice{box-shadow:none!important}
+  @page{margin:0;size:A4}
+}
+
+.luxury-invoice{
+  background:#fff;color:#1a1612;
+  font-family:'Montserrat',sans-serif;
+  max-width:800px;margin:0 auto;
+  box-shadow:0 24px 80px rgba(0,0,0,.22);
+  border-radius:3px;overflow:hidden;
+  position:relative;
+}
+
+/* ─ Header band ─ */
+.li-header{
+  background:linear-gradient(135deg,#12100e 0%,#1e1b16 50%,#0e1520 100%);
+  padding:32px 42px 28px;position:relative;overflow:hidden;
+}
+.li-header::before{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(-45deg,transparent,transparent 28px,rgba(201,168,76,.025) 28px,rgba(201,168,76,.025) 29px);
+}
+.li-header::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:2.5px;
+  background:linear-gradient(90deg,transparent 0%,#8a5e10 15%,#c9a84c 35%,#e8c969 50%,#c9a84c 65%,#8a5e10 85%,transparent 100%);
+}
+.li-hdr-inner{display:flex;justify-content:space-between;align-items:flex-start;position:relative;z-index:1}
+
+/* Logo */
+.li-logo{display:flex;align-items:center;gap:15px}
+.li-gem{
+  width:58px;height:58px;border-radius:11px;flex-shrink:0;
+  background:linear-gradient(145deg,#c9a84c 0%,#e8c969 40%,#a07828 70%,#5a3a08 100%);
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 6px 28px rgba(201,168,76,.45),inset 0 1px 0 rgba(255,255,255,.2),inset 0 -1px 0 rgba(0,0,0,.3);
+  position:relative;
+}
+.li-gem::before{
+  content:'';position:absolute;top:3px;left:3px;right:3px;height:40%;
+  background:linear-gradient(180deg,rgba(255,255,255,.18),transparent);
+  border-radius:8px 8px 50% 50%;
+}
+.li-gem svg{width:30px;height:30px;color:#fff;position:relative;z-index:1}
+.li-co-name{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700;color:#fff;letter-spacing:2.5px;line-height:1}
+.li-co-name span{color:#c9a84c}
+.li-co-tag{font-size:9px;font-weight:700;color:#c9a84c;letter-spacing:3px;text-transform:uppercase;margin-top:3px}
+.li-co-contact{font-size:10.5px;color:rgba(255,255,255,.45);margin-top:7px;line-height:1.65}
+
+/* Doc badge */
+.li-doc-badge{text-align:right}
+.li-doc-type{
+  font-family:'Cormorant Garamond',serif;
+  font-size:42px;font-weight:700;letter-spacing:5px;
+  text-transform:uppercase;line-height:1;
+}
+.li-doc-ref{font-family:'DM Mono',monospace;font-size:13px;color:rgba(255,255,255,.65);margin-top:7px}
+.li-doc-date{font-size:11px;color:rgba(255,255,255,.42);margin-top:3px;line-height:1.6}
+
+/* ─ Client / meta band ─ */
+.li-meta{
+  display:grid;grid-template-columns:1.2fr 1fr;
+  background:#faf8f3;border-bottom:1.5px solid #e2d9c2;
+}
+.li-meta-cell{padding:20px 42px;position:relative}
+.li-meta-cell+.li-meta-cell{border-left:1px solid #e2d9c2}
+.li-meta-cell+.li-meta-cell::before{
+  content:'';position:absolute;left:0;top:20px;bottom:20px;width:1px;
+  background:linear-gradient(180deg,transparent,#c9a84c,transparent);
+  opacity:.35;
+}
+.li-meta-lbl{font-size:8px;font-weight:800;color:#c9a84c;letter-spacing:2.5px;text-transform:uppercase;margin-bottom:6px}
+.li-meta-name{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:700;color:#12100e;margin-bottom:3px}
+.li-meta-detail{font-size:11.5px;color:#666;line-height:1.7}
+.li-meta-detail .lbl{font-weight:700;color:#444}
+
+/* ─ Decorative divider ─ */
+.li-section-head{
+  display:flex;align-items:center;gap:14px;
+  padding:16px 42px 10px;
+  font-size:9px;font-weight:800;color:#c9a84c;letter-spacing:2.5px;text-transform:uppercase;
+}
+.li-section-head::before,.li-section-head::after{content:'';flex:1;height:1px}
+.li-section-head::before{background:linear-gradient(90deg,transparent,#c9a84c)}
+.li-section-head::after{background:linear-gradient(90deg,#c9a84c,transparent)}
+
+/* ─ Items table ─ */
+.li-tbl-wrap{padding:0 42px 20px}
+.li-table{width:100%;border-collapse:collapse;border-radius:6px;overflow:hidden}
+.li-table thead tr{background:linear-gradient(135deg,#12100e,#1e1b16)}
+.li-table thead th{
+  padding:11px 13px;text-align:left;
+  font-size:9px;font-weight:800;color:#c9a84c;letter-spacing:1.5px;text-transform:uppercase;
+}
+.li-table thead th:last-child,.li-table thead th.r{text-align:right}
+.li-table thead th.c{text-align:center}
+.li-table tbody tr{border-bottom:1px solid #ede8d8;transition:background .1s}
+.li-table tbody tr:nth-child(even){background:#faf8f3}
+.li-table tbody td{padding:11px 13px;font-size:12.5px;color:#2a2318;vertical-align:middle}
+.li-table tbody td.r{text-align:right;font-family:'DM Mono',monospace;font-size:13px;font-weight:600}
+.li-table tbody td.c{text-align:center}
+.li-item-sku{
+  font-family:'DM Mono',monospace;font-size:9.5px;color:#c9a84c;
+  background:rgba(201,168,76,.1);padding:2px 6px;border-radius:3px;
+  display:inline-block;margin-bottom:3px;
+}
+.li-item-name{font-weight:700;color:#12100e;font-size:12.5px}
+.li-item-desc{font-size:10.5px;color:#888;margin-top:1px}
+.li-vat-cell{font-size:10.5px;color:#aaa;text-align:center}
+
+/* ─ Bottom section ─ */
+.li-bottom{display:grid;grid-template-columns:1fr auto;gap:0;padding:4px 42px 30px;align-items:start}
+.li-notes-col{padding-right:36px;padding-top:6px}
+.li-notes-lbl{font-size:8px;font-weight:800;color:#c9a84c;letter-spacing:2px;text-transform:uppercase;margin-bottom:7px}
+.li-notes-text{font-size:11.5px;color:#666;line-height:1.75;max-width:340px}
+.li-words{
+  margin-top:16px;padding:12px 14px;
+  background:linear-gradient(135deg,#12100e,#1e1b16);
+  border-radius:7px;border-left:3px solid #c9a84c;
+}
+.li-words-lbl{font-size:8px;font-weight:800;color:#c9a84c;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px}
+.li-words-text{font-size:11.5px;color:rgba(255,255,255,.75);font-style:italic;line-height:1.5}
+
+/* Totals block */
+.li-totals-box{min-width:270px}
+.li-tot-inner{background:#faf8f3;border:1px solid #e2d9c2;border-radius:8px;overflow:hidden}
+.li-tot-row{display:flex;justify-content:space-between;align-items:center;padding:9px 16px;font-size:12.5px;border-bottom:1px solid #ede8d8}
+.li-tot-row:last-child{border-bottom:none}
+.li-tot-lbl{color:#666;font-weight:500}
+.li-tot-val{font-family:'DM Mono',monospace;color:#1a1612;font-weight:500}
+.li-tot-disc .li-tot-lbl{color:#c9a84c}
+.li-tot-disc .li-tot-val{color:#c9a84c}
+.li-tot-grand{
+  background:linear-gradient(135deg,#12100e 0%,#1e1b16 60%,#0e1520 100%);
+  padding:15px 16px;
+  display:flex;justify-content:space-between;align-items:center;
+  border-top:2px solid #c9a84c;
+}
+.li-tot-grand-lbl{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:700;color:#fff;letter-spacing:1px}
+.li-tot-grand-val{font-family:'DM Mono',monospace;font-size:22px;color:#c9a84c;font-weight:500}
+.li-payable{
+  padding:9px 16px;font-size:11px;color:#888;
+  text-align:center;border-top:1px solid #ede8d8;
+  font-style:italic;background:#faf8f3;
+}
+
+/* ─ Terms ─ */
+.li-terms-band{
+  margin:0 42px 24px;padding:14px 18px;
+  background:#faf8f3;border:1px solid #e2d9c2;border-radius:7px;
+  border-left:3px solid #c9a84c;
+}
+.li-terms-title{font-size:8px;font-weight:800;color:#c9a84c;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px}
+.li-terms-text{font-size:10px;color:#777;line-height:1.75}
+
+/* ─ Signature strip ─ */
+.li-footer{
+  background:linear-gradient(135deg,#12100e 0%,#1e1b16 60%,#0e1520 100%);
+  padding:18px 42px;
+  display:grid;grid-template-columns:1fr auto 1fr;
+  align-items:center;gap:20px;
+  position:relative;
+}
+.li-footer::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,#c9a84c 30%,#e8c969 50%,#c9a84c 70%,transparent);
+}
+.li-footer-brand{font-family:'Cormorant Garamond',serif;font-size:13px;color:rgba(255,255,255,.4)}
+.li-footer-brand strong{color:#c9a84c}
+.li-footer-sig{text-align:center}
+.li-sig-line{width:130px;border-top:1px solid rgba(201,168,76,.35);margin:0 auto 5px}
+.li-sig-lbl{font-size:8.5px;color:rgba(255,255,255,.35);letter-spacing:1.5px;text-transform:uppercase}
+.li-sig-name{font-size:11px;color:rgba(255,255,255,.65);margin-top:2px;font-weight:600}
+.li-footer-contact{text-align:right;font-size:10px;color:rgba(255,255,255,.38);line-height:1.8}
+.li-footer-contact a{color:#c9a84c;text-decoration:none}
+
+/* Watermark */
+.li-watermark{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%) rotate(-30deg);
+  font-family:'Cormorant Garamond',serif;
+  font-size:96px;font-weight:700;opacity:.04;
+  pointer-events:none;color:#c9a84c;
+  letter-spacing:12px;text-transform:uppercase;white-space:nowrap;
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="sidebar">
+  <div class="logo-block">
+    <div class="logo-row">
+      <div class="logo-gem">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      </div>
+      <div>
+        <div class="logo-name">KAM<b>SHAWN</b></div>
+        <div class="logo-tag">Trading FZC LLC</div>
+      </div>
+    </div>
+    <div class="logo-sub">Sharjah &middot; Dubai &middot; Abu Dhabi</div>
+  </div>
+  <nav class="nav">
+    <div class="nav-sec">Documents</div>
+    <div class="nav-item active" onclick="showPage('dashboard')">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </div>
+    <div class="nav-item" onclick="showPage('invoices')">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      Invoices
+    </div>
+    <div class="nav-item" onclick="showPage('quotations')">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>
+      Quotations
+    </div>
+    <div class="nav-item" onclick="showPage('returns')">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 10h10a8 8 0 010 16H3"/><polyline points="7 6 3 10 7 14"/></svg>
+      Return Memos
+    </div>
+    <div class="nav-sec">Inventory</div>
+    <div class="nav-item" onclick="showPage('stock')">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 7H4a2 2 0 00-2 2v10a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2z"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+      Stock &amp; Prices
+    </div>
+    <div class="nav-item" onclick="showPage('import')">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      Import Excel/CSV
+    </div>
+    <div class="nav-sec">Clients</div>
+    <div class="nav-item" onclick="showPage('clients')">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      Clients
+    </div>
+  </nav>
+</aside>
+
+<!-- ═══ MAIN ═══ -->
+<div class="main">
+  <div class="topbar">
+    <div class="page-title" id="pageTitle">Dashboard</div>
+    <div class="topbar-right">
+      <!-- THEME TOGGLE -->
+      <div class="theme-toggle">
+        <button class="theme-btn active" id="btnDark" onclick="setTheme('dark')">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+          Dark
+        </button>
+        <button class="theme-btn" id="btnLight" onclick="setTheme('light')">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          Light
+        </button>
+      </div>
+      <button class="btn btn-gold" onclick="openDocEditor('invoice')">
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New Invoice
+      </button>
+      <button class="btn btn-ghost" onclick="showPage('import')">Import</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="stats-row">
+        <div class="stat-card gold"><div class="stat-lbl">Total Invoiced</div><div class="stat-val mono" id="st-total">AED 0.00</div><div class="stat-sub" id="st-ic">0 invoices</div></div>
+        <div class="stat-card green"><div class="stat-lbl">Paid</div><div class="stat-val mono" id="st-paid">AED 0.00</div><div class="stat-sub" id="st-pc">0 paid</div></div>
+        <div class="stat-card amber"><div class="stat-lbl">Pending</div><div class="stat-val mono" id="st-pend">AED 0.00</div><div class="stat-sub" id="st-pp">0 pending</div></div>
+        <div class="stat-card red"><div class="stat-lbl">Overdue</div><div class="stat-val mono" id="st-over">AED 0.00</div><div class="stat-sub" id="st-op">0 overdue</div></div>
+      </div>
+      <div class="table-wrap">
+        <div class="table-hdr"><div class="table-ttl">Recent Documents</div><button class="btn btn-ghost" onclick="showPage('invoices')">View All</button></div>
+        <table><thead><tr><th>Ref #</th><th>Type</th><th>Client</th><th>Date</th><th>Amount (AED)</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="dashTbl"><tr><td colspan="7" style="text-align:center;color:var(--text3);padding:32px">No documents yet — create your first invoice.</td></tr></tbody></table>
+      </div>
+    </div>
+
+    <!-- INVOICES -->
+    <div class="page" id="page-invoices">
+      <div class="toolbar">
+        <div class="search-wrap"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="Search invoices..."></div>
+        <button class="btn btn-gold" onclick="openDocEditor('invoice')">+ New Invoice</button>
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>Invoice #</th><th>Client</th><th>Date</th><th>Due</th><th>Subtotal</th><th>Discount</th><th>Net</th><th>Status</th><th></th></tr></thead><tbody id="invTbl"><tr><td colspan="9" style="text-align:center;color:var(--text3);padding:32px">No invoices.</td></tr></tbody></table></div>
+    </div>
+
+    <!-- QUOTATIONS -->
+    <div class="page" id="page-quotations">
+      <div class="toolbar">
+        <div class="search-wrap"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="Search quotations..."></div>
+        <button class="btn btn-ghost" style="border-color:var(--amber);color:var(--amber)" onclick="openDocEditor('quotation')">+ New Quotation</button>
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>Quote #</th><th>Client</th><th>Date</th><th>Valid Until</th><th>Amount</th><th>Status</th><th></th></tr></thead><tbody id="quoTbl"><tr><td colspan="7" style="text-align:center;color:var(--text3);padding:32px">No quotations.</td></tr></tbody></table></div>
+    </div>
+
+    <!-- RETURNS -->
+    <div class="page" id="page-returns">
+      <div class="toolbar">
+        <div class="search-wrap"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="Search return memos..."></div>
+        <button class="btn btn-danger" onclick="openDocEditor('return')">+ New Return Memo</button>
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>Return #</th><th>Client</th><th>Ref Invoice</th><th>Date</th><th>Amount</th><th>Reason</th><th></th></tr></thead><tbody id="retTbl"><tr><td colspan="7" style="text-align:center;color:var(--text3);padding:32px">No return memos.</td></tr></tbody></table></div>
+    </div>
+
+    <!-- STOCK -->
+    <div class="page" id="page-stock">
+      <div class="toolbar">
+        <div class="search-wrap"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="Search products..." oninput="renderStock(this.value)"></div>
+        <button class="btn btn-gold" onclick="openProductModal()">+ Add Product</button>
+        <button class="btn btn-ghost" onclick="showPage('import')">Import</button>
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>SKU</th><th>Name</th><th>Category</th><th>Unit Price (AED)</th><th>Stock Qty</th><th>VAT %</th><th>Status</th><th></th></tr></thead><tbody id="stockTbl"><tr><td colspan="8" style="text-align:center;color:var(--text3);padding:32px">No products yet.</td></tr></tbody></table></div>
+    </div>
+
+    <!-- IMPORT -->
+    <div class="page" id="page-import">
+      <div class="table-wrap" style="padding:28px;max-width:620px">
+        <h3 style="font-family:var(--font-display);font-size:20px;margin-bottom:6px">Import Stock & Price List</h3>
+        <p style="color:var(--text2);font-size:12px;margin-bottom:20px">Upload a CSV (exported from Excel). Columns: <span class="badge badge-gold" style="font-family:var(--font-mono)">sku, name, price, stock, category, tax</span></p>
+        <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleFileDrop(event)">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" style="width:38px;height:38px;margin-bottom:12px;color:var(--gold)"><path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+          <h3 style="font-size:14px;margin-bottom:4px">Drag &amp; drop your CSV here</h3>
+          <p style="font-size:12px">or click to browse</p>
+        </div>
+        <input type="file" id="fileInput" accept=".csv" style="display:none" onchange="handleFileInput(this)">
+        <div id="importPreview" style="display:none;margin-top:18px">
+          <h4 style="margin-bottom:10px;font-size:12px;color:var(--text2)">Preview (first 5 rows)</h4>
+          <div class="table-wrap" style="max-height:180px;overflow:auto"><table><thead id="previewHead"></thead><tbody id="previewBody"></tbody></table></div>
+          <div style="display:flex;gap:8px;margin-top:14px"><button class="btn btn-gold" id="confirmImport">✓ Import</button><button class="btn btn-ghost" onclick="document.getElementById('importPreview').style.display='none'">Cancel</button></div>
+        </div>
+        <div class="section-div"></div>
+        <pre style="background:var(--surface2);border-radius:8px;padding:14px;font-size:11px;color:var(--text2);overflow:auto;line-height:1.8;font-family:var(--font-mono)">sku,name,category,price,stock,tax
+KMC-43,S-340 Box Stainless Steel,Hardware,320.00,50,0
+KMC-PI0,110mm Pipe Floor Lights,Electrical,60.00,100,0
+KMC-ALU,Aluminum Profile 14x07,Profiles,8.00,200,5</pre>
+      </div>
+    </div>
+
+    <!-- CLIENTS -->
+    <div class="page" id="page-clients">
+      <div class="toolbar">
+        <div class="search-wrap"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="Search clients..." oninput="renderClients(this.value)"></div>
+        <button class="btn btn-gold" onclick="openClientModal()">+ Add Client</button>
+      </div>
+      <div class="table-wrap"><table><thead><tr><th>Name</th><th>Company</th><th>Email</th><th>Phone</th><th>City</th><th>TRN</th><th>Total Invoiced</th><th></th></tr></thead><tbody id="clientTbl"><tr><td colspan="8" style="text-align:center;color:var(--text3);padding:32px">No clients yet.</td></tr></tbody></table></div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<!-- ═══ DOC EDITOR MODAL ═══ -->
+<div class="overlay" id="docModal">
+  <div class="modal"><button class="modal-close" onclick="closeModal('docModal')">✕</button><div id="docEditorContent"></div></div>
+</div>
+
+<!-- ═══ PRINT PREVIEW MODAL ═══ -->
+<div class="overlay" id="printModal">
+  <div class="modal" style="max-width:860px;background:#d8d4cc">
+    <button class="modal-close" onclick="closeModal('printModal')" style="background:#333;color:#fff;z-index:2">✕</button>
+    <div class="print-toolbar" style="display:flex;gap:8px;margin-bottom:16px">
+      <button class="btn btn-gold" onclick="window.print()">🖨 Print / Save PDF</button>
+      <button class="btn btn-ghost" style="background:#fff" onclick="closeModal('printModal')">Close</button>
+    </div>
+    <div id="printContent"></div>
+  </div>
+</div>
+
+<!-- ═══ PRODUCT MODAL ═══ -->
+<div class="overlay" id="productModal">
+  <div class="modal modal-sm">
+    <button class="modal-close" onclick="closeModal('productModal')">✕</button>
+    <div class="modal-ttl" id="prodModalTtl">Add Product</div>
+    <div class="modal-sub">Add to KAMSHAWN stock & price list</div>
+    <div class="form-grid">
+      <div class="form-group"><label>SKU / Item Code</label><input id="p-sku" placeholder="KMC-001"></div>
+      <div class="form-group"><label>Category</label><input id="p-cat" placeholder="Hardware"></div>
+      <div class="form-group full"><label>Product Name / Description</label><input id="p-name" placeholder="Underground Box Stainless Steel"></div>
+      <div class="form-group"><label>Unit Price (AED)</label><input id="p-price" type="number" step="0.01" placeholder="0.00"></div>
+      <div class="form-group"><label>Stock Qty</label><input id="p-stock" type="number" placeholder="0"></div>
+      <div class="form-group"><label>VAT %</label><input id="p-tax" type="number" placeholder="0"></div>
+      <div class="form-group"><label>Unit</label><input id="p-unit" placeholder="Nos"></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:18px"><button class="btn btn-gold" onclick="saveProduct()">Save Product</button><button class="btn btn-ghost" onclick="closeModal('productModal')">Cancel</button></div>
+  </div>
+</div>
+
+<!-- ═══ CLIENT MODAL ═══ -->
+<div class="overlay" id="clientModal">
+  <div class="modal modal-sm">
+    <button class="modal-close" onclick="closeModal('clientModal')">✕</button>
+    <div class="modal-ttl">Add Client</div>
+    <div class="modal-sub">Details auto-fill into all KAMSHAWN documents</div>
+    <div class="form-grid">
+      <div class="form-group full"><label>Full Name</label><input id="c-name" placeholder="John Smith"></div>
+      <div class="form-group full"><label>Company</label><input id="c-company" placeholder="Elite Realty Solutions"></div>
+      <div class="form-group"><label>Email</label><input id="c-email" type="email" placeholder="john@company.com"></div>
+      <div class="form-group"><label>Phone</label><input id="c-phone" placeholder="+971 58 000 0000"></div>
+      <div class="form-group"><label>City / Emirate</label><input id="c-city" placeholder="Dubai"></div>
+      <div class="form-group"><label>TRN / Tax ID</label><input id="c-tax" placeholder="TRN-0000000"></div>
+      <div class="form-group full"><label>Address</label><textarea id="c-addr" rows="2" placeholder="Full address..."></textarea></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:18px"><button class="btn btn-gold" onclick="saveClient()">Save Client</button><button class="btn btn-ghost" onclick="closeModal('clientModal')">Cancel</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════
+//  THEME
+// ══════════════════════════════════════════
+function setTheme(t){
+  document.documentElement.setAttribute('data-theme',t);
+  document.getElementById('btnDark').classList.toggle('active',t==='dark');
+  document.getElementById('btnLight').classList.toggle('active',t==='light');
+  localStorage.setItem('ks_theme',t);
+}
+(function(){const t=localStorage.getItem('ks_theme')||'dark';setTheme(t)})();
+
+// ══════════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════════
+let db={products:[],clients:[],docs:[],settings:{
+  company:'KAMSHAWN TRADING FZC LLC',address:'Sharjah | Dubai | Abu Dhabi',
+  phone:'+971 54 474 2210',phone2:'+971 56 344 6996',
+  email:'Business.ellishawn@gmail.com',salesPerson:'Mr. Shawn (+971 52 370 3676)',
+  currency:'AED',nextInv:16,nextQuo:1,nextRet:1
+}};
+function save(){try{localStorage.setItem('ks_erp',JSON.stringify(db))}catch(e){}}
+function load(){try{const d=localStorage.getItem('ks_erp');if(d)db=JSON.parse(d)}catch(e){}}
+load();
+
+// ══════════════════════════════════════════
+//  NAV
+// ══════════════════════════════════════════
+const PT={dashboard:'Dashboard',invoices:'Invoices',quotations:'Quotations',returns:'Return Memos',stock:'Stock & Price List',import:'Import Excel / CSV',clients:'Clients'};
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.getElementById('pageTitle').textContent=PT[id]||id;
+  document.querySelectorAll('.nav-item').forEach(n=>{if(n.getAttribute('onclick')?.includes("'"+id+"'"))n.classList.add('active')});
+  if(id==='dashboard')updateDash();
+  if(id==='stock')renderStock();
+  if(id==='invoices')renderDocTbl('invoice');
+  if(id==='quotations')renderDocTbl('quotation');
+  if(id==='returns')renderDocTbl('return');
+  if(id==='clients')renderClients();
+}
+function openModal(id){document.getElementById(id).classList.add('open')}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open')}));
+function toast(msg,type='ok'){const t=document.getElementById('toast');t.textContent=(type==='ok'?'✓ ':'✕ ')+msg;t.className='toast show '+type;setTimeout(()=>t.className='toast',2800)}
+
+// ══════════════════════════════════════════
+//  PRODUCTS
+// ══════════════════════════════════════════
+let epIdx=-1;
+function openProductModal(idx=-1){
+  epIdx=idx;
+  if(idx>=0){const p=db.products[idx];['p-sku','p-name','p-cat','p-price','p-stock','p-tax','p-unit'].forEach(id=>{const f=id.replace('p-','');document.getElementById(id).value=p[f]||p.category||''});document.getElementById('p-sku').value=p.sku;document.getElementById('p-name').value=p.name;document.getElementById('p-cat').value=p.category;document.getElementById('p-price').value=p.price;document.getElementById('p-stock').value=p.stock;document.getElementById('p-tax').value=p.tax;document.getElementById('p-unit').value=p.unit||'Nos';document.getElementById('prodModalTtl').textContent='Edit Product';}
+  else{['p-sku','p-name','p-cat','p-price','p-stock','p-tax','p-unit'].forEach(id=>document.getElementById(id).value='');document.getElementById('prodModalTtl').textContent='Add Product';}
+  openModal('productModal');
+}
+function saveProduct(){
+  const p={sku:document.getElementById('p-sku').value.trim()||'SKU'+Date.now(),name:document.getElementById('p-name').value.trim(),category:document.getElementById('p-cat').value.trim()||'General',price:parseFloat(document.getElementById('p-price').value)||0,stock:parseInt(document.getElementById('p-stock').value)||0,tax:parseFloat(document.getElementById('p-tax').value)||0,unit:document.getElementById('p-unit').value.trim()||'Nos'};
+  if(!p.name){toast('Product name required','err');return;}
+  if(epIdx>=0)db.products[epIdx]=p;else db.products.push(p);
+  save();renderStock();closeModal('productModal');toast(epIdx>=0?'Updated':'Product added');
+}
+function delProduct(idx){if(!confirm('Delete product?'))return;db.products.splice(idx,1);save();renderStock();}
+function renderStock(f=''){
+  const tb=document.getElementById('stockTbl'),fl=f.toLowerCase();
+  const items=db.products.filter(p=>!fl||p.name.toLowerCase().includes(fl)||p.sku.toLowerCase().includes(fl));
+  if(!items.length){tb.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--text3);padding:32px">No products found.</td></tr>';return;}
+  tb.innerHTML=items.map(p=>{const i=db.products.indexOf(p);const s=p.stock<=0?'<span class="badge badge-red">Out</span>':p.stock<10?'<span class="badge badge-amber">Low</span>':'<span class="badge badge-green">In Stock</span>';return`<tr><td class="mono" style="color:var(--gold)">${p.sku}</td><td>${p.name}</td><td><span class="badge badge-gold">${p.category}</span></td><td class="mono">${p.price.toFixed(2)}</td><td class="mono">${p.stock} ${p.unit||'Nos'}</td><td class="mono">${p.tax}%</td><td>${s}</td><td style="display:flex;gap:5px"><button class="btn btn-ghost" style="padding:4px 9px;font-size:11px" onclick="openProductModal(${i})">Edit</button><button class="btn btn-danger" style="padding:4px 9px;font-size:11px" onclick="delProduct(${i})">Del</button></td></tr>`;}).join('');
+}
+
+// ══════════════════════════════════════════
+//  CLIENTS
+// ══════════════════════════════════════════
+function openClientModal(){['c-name','c-company','c-email','c-phone','c-city','c-tax','c-addr'].forEach(id=>document.getElementById(id).value='');openModal('clientModal');}
+function saveClient(){
+  const c={id:Date.now(),name:document.getElementById('c-name').value.trim(),company:document.getElementById('c-company').value.trim(),email:document.getElementById('c-email').value.trim(),phone:document.getElementById('c-phone').value.trim(),city:document.getElementById('c-city').value.trim(),taxId:document.getElementById('c-tax').value.trim(),address:document.getElementById('c-addr').value.trim()};
+  if(!c.name){toast('Name required','err');return;}
+  db.clients.push(c);save();renderClients();closeModal('clientModal');toast('Client saved');
+}
+function delClient(id){if(!confirm('Delete client?'))return;db.clients=db.clients.filter(c=>c.id!==id);save();renderClients();}
+function renderClients(f=''){
+  const tb=document.getElementById('clientTbl'),fl=(f||'').toLowerCase();
+  const items=db.clients.filter(c=>!fl||c.name.toLowerCase().includes(fl)||c.company.toLowerCase().includes(fl));
+  if(!items.length){tb.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--text3);padding:32px">No clients.</td></tr>';return;}
+  tb.innerHTML=items.map(c=>{const total=db.docs.filter(d=>d.clientId===c.id&&d.type==='invoice').reduce((s,d)=>s+d.net,0);return`<tr><td>${c.name}</td><td>${c.company||'—'}</td><td style="color:var(--gold)">${c.email||'—'}</td><td>${c.phone||'—'}</td><td>${c.city||'—'}</td><td class="mono">${c.taxId||'—'}</td><td class="mono">${total.toFixed(2)}</td><td><button class="btn btn-danger" style="padding:4px 9px;font-size:11px" onclick="delClient(${c.id})">Del</button></td></tr>`;}).join('');
+}
+
+// ══════════════════════════════════════════
+//  DOC EDITOR
+// ══════════════════════════════════════════
+let curType='invoice',curLines=[],editIdx=-1;
+function nL(){return{sku:'',name:'',qty:1,price:0,discount:0,tax:0,unit:'Nos'};}
+function openDocEditor(type,idx=-1){
+  curType=type;editIdx=idx;
+  curLines=idx>=0?JSON.parse(JSON.stringify(db.docs[idx].lines)):[nL()];
+  renderDocEditor(idx>=0?db.docs[idx]:null);
+  openModal('docModal');
+}
+function pad(n){return String(n).padStart(4,'0');}
+function renderDocEditor(doc=null){
+  const S=db.settings,lbl={invoice:'Invoice',quotation:'Quotation',return:'Return Memo'}[curType];
+  const isRet=curType==='return',today=new Date().toISOString().split('T')[0];
+  const ref=doc?doc.refNum:(curType==='invoice'?'INV-'+pad(S.nextInv):curType==='quotation'?'QUO-'+pad(S.nextQuo):'RET-'+pad(S.nextRet));
+  const cOpts=db.clients.map(c=>`<option value="${c.id}">${c.name}${c.company?' — '+c.company:''}</option>`).join('');
+  const iOpts=db.docs.filter(d=>d.type==='invoice').map(d=>`<option value="${d.refNum}">${d.refNum} — ${d.clientName}</option>`).join('');
+  document.getElementById('docEditorContent').innerHTML=`
+    <div class="modal-ttl">${doc?'Edit ':'New '}${lbl} <span style="color:var(--gold);font-family:var(--font-mono);font-size:15px">#${ref}</span></div>
+    <div class="modal-sub">KAMSHAWN TRADING FZC LLC &mdash; ${lbl}</div>
+    <div class="inv-hdr-grid">
+      <div class="inv-block"><h4>From &mdash; KAMSHAWN</h4><div style="font-weight:700;font-size:14px">${S.company}</div><div style="color:var(--text2);font-size:11.5px;margin-top:5px;line-height:1.75">${S.address}<br>${S.phone} &middot; ${S.phone2}<br><span style="color:var(--gold)">${S.email}</span></div></div>
+      <div class="inv-block"><h4>Document Details</h4>
+        <div class="form-grid" style="grid-template-columns:1fr 1fr;gap:9px">
+          <div class="form-group"><label>Bill To</label><select id="de-client" onchange="onCC()">${cOpts?'<option value="">— Select Client —</option>'+cOpts:'<option value="">Add a client first</option>'}</select></div>
+          <div class="form-group"><label>Date</label><input type="date" id="de-date" value="${doc?doc.date:today}"></div>
+          ${isRet?`<div class="form-group"><label>Ref Invoice</label><select id="de-ref"><option value="">Select Invoice</option>${iOpts}</select></div>`:`<div class="form-group"><label>${curType==='quotation'?'Valid Until':'Due Date'}</label><input type="date" id="de-due" value="${doc?doc.due:''}"></div>`}
+          <div class="form-group"><label>Global Discount %</label><input type="number" id="de-disc" min="0" max="100" placeholder="0" value="${doc?doc.discountPct:0}" oninput="recalc()"></div>
+          <div class="form-group"><label>Sales Person</label><input id="de-sales" value="${doc?doc.salesPerson:S.salesPerson}"></div>
+          ${isRet?`<div class="form-group full"><label>Return Reason</label><input id="de-reason" placeholder="Reason..." value="${doc?doc.reason:''}"></div>`:''}
+        </div>
+        <div id="clientPreview"></div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px">
+      <h4 style="font-family:var(--font-display);font-size:16px">Line Items</h4>
+      <button class="btn btn-ghost" style="font-size:11px" onclick="addLine()">+ Add Row</button>
+    </div>
+    <div class="items-tbl-wrap"><table class="items-tbl"><thead><tr><th style="width:115px">SKU</th><th>Description</th><th style="width:55px">Qty</th><th style="width:60px">Unit</th><th style="width:95px">Rate</th><th style="width:65px">Disc%</th><th style="width:60px">VAT%</th><th style="width:95px;text-align:right">Amount</th><th style="width:30px"></th></tr></thead><tbody id="lineItems"></tbody></table></div>
+    <div style="display:flex;justify-content:flex-end"><div class="inv-totals-box" id="invTotals"></div></div>
+    <div class="form-group" style="margin-top:13px"><label>Notes / Payment Terms</label><textarea id="de-notes" rows="2" placeholder="70% advance required...">${doc?doc.notes:''}</textarea></div>
+    <div class="inv-act-row">
+      <button class="btn btn-ghost" onclick="closeModal('docModal')">Cancel</button>
+      <button class="btn btn-ghost" onclick="previewDoc()">👁 Preview &amp; Print</button>
+      <button class="btn btn-gold" onclick="saveDoc()">Save ${lbl}</button>
+    </div>`;
+  if(doc&&doc.clientId){document.getElementById('de-client').value=doc.clientId;showCP(doc.clientId);}
+  renderLines();recalc();
+}
+function onCC(){showCP(document.getElementById('de-client').value);}
+function showCP(cid){
+  const el=document.getElementById('clientPreview'),c=db.clients.find(x=>x.id==cid);
+  if(!c||!el){if(el)el.style.display='none';return;}
+  el.style.display='block';
+  el.innerHTML=`<div class="prev-row"><span style="color:var(--text3)">Company</span><span>${c.company||'—'}</span></div><div class="prev-row"><span style="color:var(--text3)">Phone</span><span>${c.phone||'—'}</span></div><div class="prev-row"><span style="color:var(--text3)">Email</span><span style="color:var(--gold)">${c.email||'—'}</span></div><div class="prev-row"><span style="color:var(--text3)">TRN</span><span>${c.taxId||'—'}</span></div>`;
+}
+function renderLines(){
+  const tb=document.getElementById('lineItems');if(!tb)return;
+  const po=db.products.map(p=>`<option value="${p.sku}" data-p="${p.price}" data-t="${p.tax}" data-n="${p.name}" data-u="${p.unit||'Nos'}">${p.sku} — ${p.name}</option>`).join('');
+  tb.innerHTML=curLines.map((l,i)=>`<tr>
+    <td><select onchange="onPS(${i},this)" style="font-size:11px"><option value="">— Select —</option>${po}</select></td>
+    <td><input value="${l.name}" oninput="ul(${i},'name',this.value)" placeholder="Description"></td>
+    <td><input type="number" value="${l.qty}" min="1" oninput="ul(${i},'qty',this.value)" style="text-align:center"></td>
+    <td><input value="${l.unit||'Nos'}" oninput="ul(${i},'unit',this.value)" style="text-align:center"></td>
+    <td><input type="number" value="${l.price}" step="0.01" oninput="ul(${i},'price',this.value)" style="text-align:right"></td>
+    <td><input type="number" value="${l.discount}" min="0" max="100" oninput="ul(${i},'discount',this.value)" style="text-align:center"></td>
+    <td><input type="number" value="${l.tax}" min="0" oninput="ul(${i},'tax',this.value)" style="text-align:center"></td>
+    <td style="font-family:var(--font-mono);text-align:right;color:var(--gold)" id="la-${i}"></td>
+    <td><button onclick="removeLine(${i})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:19px;line-height:1">×</button></td>
+  </tr>`).join('');
+  curLines.forEach((_,i)=>uLA(i));
+}
+function onPS(i,s){const o=s.options[s.selectedIndex];if(!o.value)return;curLines[i]={...curLines[i],sku:o.value,name:o.dataset.n||'',price:parseFloat(o.dataset.p)||0,tax:parseFloat(o.dataset.t)||0,unit:o.dataset.u||'Nos'};renderLines();recalc();}
+function ul(i,f,v){curLines[i][f]=(f==='name'||f==='unit')?v:parseFloat(v)||0;uLA(i);recalc();}
+function uLA(i){const l=curLines[i],s=l.qty*l.price,d=s*(l.discount/100),t=(s-d)*(l.tax/100),a=s-d+t;const el=document.getElementById('la-'+i);if(el)el.textContent=a.toFixed(2);}
+function addLine(){curLines.push(nL());renderLines();recalc();}
+function removeLine(i){if(curLines.length<=1)return;curLines.splice(i,1);renderLines();recalc();}
+function recalc(){
+  const dp=parseFloat(document.getElementById('de-disc')?.value)||0;
+  let sub=0,ld=0,tax=0;
+  curLines.forEach(l=>{const s=l.qty*l.price,d=s*(l.discount/100),t=(s-d)*(l.tax/100);sub+=s;ld+=d;tax+=t;});
+  const aLD=sub-ld,gd=aLD*(dp/100),net=aLD-gd+tax;
+  const el=document.getElementById('invTotals');
+  if(!el)return{sub,ld,gd,tax,net};
+  el.innerHTML=`
+    <div class="tot-row"><span style="color:var(--text2)">Subtotal</span><span class="mono">${sub.toFixed(2)}</span></div>
+    <div class="tot-row"><span style="color:var(--gold)">Line Discounts</span><span class="tag-gold">−${ld.toFixed(2)}</span></div>
+    ${dp>0?`<div class="tot-row"><span style="color:var(--gold)">Global Disc (${dp}%)</span><span class="tag-gold">−${gd.toFixed(2)}</span></div>`:''}
+    <div class="tot-row"><span style="color:var(--text2)">VAT</span><span class="mono">${tax.toFixed(2)}</span></div>
+    <div class="tot-row grand"><span>Total (AED)</span><span>${net.toFixed(2)}</span></div>`;
+  return{sub,ld,gd,tax,net};
+}
+function saveDoc(){
+  const cid=document.getElementById('de-client')?.value;
+  const cl=db.clients.find(c=>c.id==cid);
+  const date=document.getElementById('de-date')?.value||new Date().toISOString().split('T')[0];
+  const due=document.getElementById('de-due')?.value||'';
+  const dp=parseFloat(document.getElementById('de-disc')?.value)||0;
+  const notes=document.getElementById('de-notes')?.value||'';
+  const reason=document.getElementById('de-reason')?.value||'';
+  const refInv=document.getElementById('de-ref')?.value||'';
+  const sp=document.getElementById('de-sales')?.value||db.settings.salesPerson;
+  const S=db.settings,t=recalc();
+  const ref=editIdx>=0?db.docs[editIdx].refNum:(curType==='invoice'?'INV-'+pad(S.nextInv):curType==='quotation'?'QUO-'+pad(S.nextQuo):'RET-'+pad(S.nextRet));
+  if(editIdx<0){if(curType==='invoice')S.nextInv++;else if(curType==='quotation')S.nextQuo++;else S.nextRet++;}
+  const doc={id:editIdx>=0?db.docs[editIdx].id:Date.now(),type:curType,refNum:ref,date,due,clientId:cid||null,clientName:cl?(cl.name+(cl.company?' — '+cl.company:'')):'Walk-in',clientCompany:cl?.company||'',clientPhone:cl?.phone||'',clientEmail:cl?.email||'',clientAddr:cl?.address||'',clientTax:cl?.taxId||'',lines:JSON.parse(JSON.stringify(curLines)),discountPct:dp,notes,reason,refInv,salesPerson:sp,subtotal:t.sub,discount:t.ld+t.gd,tax:t.tax,net:t.net,status:editIdx>=0?db.docs[editIdx].status:(curType==='invoice'?'pending':'draft')};
+  if(editIdx>=0)db.docs[editIdx]=doc;else db.docs.unshift(doc);
+  if(curType==='invoice'&&editIdx<0)curLines.forEach(l=>{const p=db.products.find(x=>x.sku===l.sku);if(p)p.stock=Math.max(0,p.stock-l.qty);});
+  save();closeModal('docModal');toast(editIdx>=0?'Document updated':'Document saved');
+  showPage({invoice:'invoices',quotation:'quotations',return:'returns'}[curType]);
+}
+
+// ══════════════════════════════════════════
+//  DOC TABLES
+// ══════════════════════════════════════════
+function renderDocTbl(type){
+  const tid={invoice:'invTbl',quotation:'quoTbl',return:'retTbl'}[type];
+  const tb=document.getElementById(tid),docs=db.docs.filter(d=>d.type===type);
+  if(!docs.length){const c={invoice:9,quotation:7,return:7}[type];tb.innerHTML=`<tr><td colspan="${c}" style="text-align:center;color:var(--text3);padding:32px">No ${type}s yet.</td></tr>`;return;}
+  tb.innerHTML=docs.map(doc=>{
+    const idx=db.docs.indexOf(doc);
+    const sc={paid:'badge-green',draft:'badge-gold',pending:'badge-amber',overdue:'badge-red',approved:'badge-green',cancelled:'badge-red'}[doc.status]||'badge-gold';
+    const acts=`<div style="display:flex;gap:4px"><button class="btn btn-ghost" style="padding:4px 9px;font-size:11px" onclick="openDocEditor('${type}',${idx})">Edit</button><button class="btn btn-ghost" style="padding:4px 9px;font-size:11px" onclick="previewById(${idx})">Print</button>${type==='invoice'?`<button class="btn btn-success" style="padding:4px 9px;font-size:11px" onclick="markPaid(${idx})">Paid</button>`:''}<button class="btn btn-danger" style="padding:4px 9px;font-size:11px" onclick="delDoc(${idx})">Del</button></div>`;
+    if(type==='invoice')return`<tr><td class="mono" style="color:var(--gold)">${doc.refNum}</td><td>${doc.clientName}</td><td class="mono">${doc.date}</td><td class="mono">${doc.due||'—'}</td><td class="mono">${doc.subtotal.toFixed(2)}</td><td class="mono" style="color:var(--gold)">${doc.discount>0?'−'+doc.discount.toFixed(2):'—'}</td><td class="mono" style="color:var(--green)">${doc.net.toFixed(2)}</td><td><span class="badge ${sc}">${doc.status}</span></td><td>${acts}</td></tr>`;
+    if(type==='quotation')return`<tr><td class="mono" style="color:var(--amber)">${doc.refNum}</td><td>${doc.clientName}</td><td class="mono">${doc.date}</td><td class="mono">${doc.due||'—'}</td><td class="mono" style="color:var(--green)">${doc.net.toFixed(2)}</td><td><span class="badge ${sc}">${doc.status}</span></td><td>${acts}</td></tr>`;
+    return`<tr><td class="mono" style="color:var(--red)">${doc.refNum}</td><td>${doc.clientName}</td><td class="mono" style="color:var(--text2)">${doc.refInv||'—'}</td><td class="mono">${doc.date}</td><td class="mono" style="color:var(--red)">${doc.net.toFixed(2)}</td><td>${doc.reason||'—'}</td><td>${acts}</td></tr>`;
+  }).join('');
+}
+function markPaid(i){db.docs[i].status='paid';save();renderDocTbl('invoice');toast('Marked as Paid');}
+function delDoc(i){if(!confirm('Delete?'))return;db.docs.splice(i,1);save();toast('Deleted','err');updateDash();['invoice','quotation','return'].forEach(t=>renderDocTbl(t));}
+
+// ══════════════════════════════════════════
+//  PRINT / LUXURY PREVIEW
+// ══════════════════════════════════════════
+function n2w(n){
+  const o=['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'],te=['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+  if(n===0)return'Zero';
+  const w=x=>x<20?o[x]:te[Math.floor(x/10)]+(x%10?' '+o[x%10]:'');
+  const th=Math.floor(n/1000),h=Math.floor((n%1000)/100),r=n%100;
+  let s='';if(th)s+=w(th)+' Thousand ';if(h)s+=o[h]+' Hundred ';if(r)s+=(s?'and ':'')+w(r);
+  return s.trim()+' Dirhams Only.';
+}
+function previewDoc(){
+  const cid=document.getElementById('de-client')?.value,cl=db.clients.find(c=>c.id==cid),S=db.settings;
+  let sub=0,ld=0,tax=0;curLines.forEach(l=>{const s=l.qty*l.price,d=s*(l.discount/100),t=(s-d)*(l.tax/100);sub+=s;ld+=d;tax+=t;});
+  const dp=parseFloat(document.getElementById('de-disc')?.value)||0,aLD=sub-ld,gd=aLD*(dp/100),net=aLD-gd+tax;
+  buildPreview({type:curType,refNum:'PREVIEW',date:document.getElementById('de-date')?.value||'',due:document.getElementById('de-due')?.value||'',clientName:cl?cl.name:'—',clientCompany:cl?.company||'',clientPhone:cl?.phone||'',clientEmail:cl?.email||'',clientAddr:cl?.address||'',clientTax:cl?.taxId||'',lines:curLines,discountPct:dp,notes:document.getElementById('de-notes')?.value||'',reason:document.getElementById('de-reason')?.value||'',salesPerson:document.getElementById('de-sales')?.value||S.salesPerson,subtotal:sub,discount:ld+gd,tax,net,status:''},S);
+  openModal('printModal');
+}
+function previewById(i){buildPreview(db.docs[i],db.settings);openModal('printModal');}
+function buildPreview(doc,S){
+  const TL={invoice:'INVOICE',quotation:'QUOTATION',return:'RETURN MEMO'}[doc.type]||'INVOICE';
+  const AC={invoice:'#c9a84c',quotation:'#f0a940',return:'#e05555'}[doc.type]||'#c9a84c';
+  let sub=0,ld=0,tax=0;
+  doc.lines.forEach(l=>{const s=l.qty*l.price,d=s*(l.discount/100),t=(s-d)*(l.tax/100);sub+=s;ld+=d;tax+=t;});
+  const aLD=sub-ld,gd=aLD*(doc.discountPct/100),net=aLD-gd+tax,td=ld+gd;
+  document.getElementById('printContent').innerHTML=`
+  <div class="luxury-invoice">
+    ${doc.status==='paid'?'<div class="li-watermark">PAID</div>':''}
+    <!-- HEADER -->
+    <div class="li-header">
+      <div class="li-hdr-inner">
+        <div class="li-logo">
+          <div class="li-gem"><svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" style="width:30px;height:30px;color:#fff;position:relative;z-index:1"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div>
+          <div>
+            <div class="li-co-name">KAM<span>SHAWN</span></div>
+            <div class="li-co-tag">Trading FZC LLC</div>
+            <div class="li-co-contact">Sharjah | Dubai | Abu Dhabi<br>${S.email}</div>
+          </div>
+        </div>
+        <div class="li-doc-badge">
+          <div class="li-doc-type" style="color:${AC}">${TL}</div>
+          <div class="li-doc-ref">Ref No: ${doc.refNum}</div>
+          <div class="li-doc-date">Date: ${doc.date}${doc.due?'<br>'+(doc.type==='quotation'?'Valid Until':'Due')+': '+doc.due:''}</div>
+        </div>
+      </div>
+    </div>
+    <!-- META -->
+    <div class="li-meta">
+      <div class="li-meta-cell">
+        <div class="li-meta-lbl">Bill To</div>
+        <div class="li-meta-name">${doc.clientName||'Walk-in Customer'}</div>
+        <div class="li-meta-detail">
+          ${doc.clientCompany?doc.clientCompany+'<br>':''}
+          ${doc.clientPhone?'<span class="lbl">Tel:</span> '+doc.clientPhone+'<br>':''}
+          ${doc.clientEmail?'<span class="lbl">Email:</span> '+doc.clientEmail+'<br>':''}
+          ${doc.clientAddr?doc.clientAddr+'<br>':''}
+          ${doc.clientTax?'<span class="lbl">TRN:</span> '+doc.clientTax:''}
+        </div>
+        ${doc.reason?`<div style="margin-top:8px;font-size:11px;color:#c0392b;font-weight:600">Return Reason: ${doc.reason}</div>`:''}
+      </div>
+      <div class="li-meta-cell">
+        <div class="li-meta-lbl">Issued By</div>
+        <div class="li-meta-name">Shawn Ali</div>
+        <div class="li-meta-detail">
+          <span class="lbl">Sales:</span> ${doc.salesPerson||S.salesPerson}<br>
+          <span class="lbl">Tel:</span> ${S.phone}<br>
+          <span class="lbl">Alt:</span> ${S.phone2}
+        </div>
+      </div>
+    </div>
+    <!-- ITEMS -->
+    <div class="li-section-head">Items &amp; Services</div>
+    <div class="li-tbl-wrap">
+      <table class="li-table">
+        <thead><tr>
+          <th style="width:32px">#</th>
+          <th style="width:90px">SKU</th>
+          <th>Description</th>
+          <th class="c" style="width:50px">Qty</th>
+          <th class="c" style="width:55px">Unit</th>
+          <th class="r" style="width:90px">Rate</th>
+          <th class="c" style="width:80px">VAT</th>
+          <th class="r" style="width:95px">Amount</th>
+        </tr></thead>
+        <tbody>
+          ${doc.lines.map((l,i)=>{const s=l.qty*l.price,d=s*(l.discount/100),t=(s-d)*(l.tax/100),a=s-d+t;return`<tr>
+            <td style="color:#bbb;font-size:11px;text-align:center">${i+1}</td>
+            <td>${l.sku?`<span class="li-item-sku">${l.sku}</span>`:''}</td>
+            <td><div class="li-item-name">${l.name||'—'}</div>${l.discount>0?`<div class="li-item-desc">Disc: ${l.discount}% applied</div>`:''}</td>
+            <td class="c">${l.qty}</td>
+            <td class="c li-vat-cell">${l.unit||'Nos'}</td>
+            <td class="r">${parseFloat(l.price).toFixed(2)}</td>
+            <td class="li-vat-cell">${l.tax>0?l.tax+'%':'Not Applicable'}</td>
+            <td class="r" style="color:#12100e;font-weight:700">${a.toFixed(2)}</td>
+          </tr>`}).join('')}
+        </tbody>
+      </table>
+    </div>
+    <!-- BOTTOM -->
+    <div class="li-bottom">
+      <div class="li-notes-col">
+        ${doc.notes?`<div class="li-notes-lbl">Notes</div><div class="li-notes-text">${doc.notes}</div>`:''}
+        <div class="li-words" style="margin-top:${doc.notes?14:0}px">
+          <div class="li-words-lbl">Total in Words</div>
+          <div class="li-words-text">${n2w(Math.round(net))}</div>
+        </div>
+      </div>
+      <div class="li-totals-box">
+        <div class="li-tot-inner">
+          <div class="li-tot-row"><span class="li-tot-lbl">Subtotal (AED)</span><span class="li-tot-val">${sub.toFixed(2)}</span></div>
+          ${td>0?`<div class="li-tot-row li-tot-disc"><span class="li-tot-lbl">Total Discount</span><span class="li-tot-val">− ${td.toFixed(2)}</span></div>`:''}
+          <div class="li-tot-row"><span class="li-tot-lbl">VAT 5%</span><span class="li-tot-val">${tax>0?tax.toFixed(2):'Not Applicable'}</span></div>
+        </div>
+        <div class="li-tot-grand">
+          <span class="li-tot-grand-lbl">Total Amount</span>
+          <span class="li-tot-grand-val">${net.toFixed(2)}</span>
+        </div>
+        ${td>0?`<div class="li-payable">Payable After Discount: <strong>AED ${net.toFixed(2)}</strong></div>`:''}
+      </div>
+    </div>
+    <!-- TERMS -->
+    <div class="li-terms-band">
+      <div class="li-terms-title">Payment Terms &amp; Conditions</div>
+      <div class="li-terms-text">70% advance payment is required to confirm the order. The remaining 30% must be paid upon delivery. Ownership of goods remains with KAMSHAWN TRADING FZC LLC until full payment is received. All lighting products, customized items, and electrical goods are non-returnable after 15 days from delivery. Warranty covers manufacturer defects only and does not cover damages from improper installation, misuse, or voltage fluctuation.</div>
+    </div>
+    <!-- FOOTER -->
+    <div class="li-footer">
+      <div class="li-footer-brand">Issued by<br><strong>KAMSHAWN TRADING FZC LLC</strong></div>
+      <div class="li-footer-sig">
+        <div class="li-sig-line"></div>
+        <div class="li-sig-lbl">Authorised Signature</div>
+        <div class="li-sig-name">Shawn Ali</div>
+      </div>
+      <div class="li-footer-contact">
+        ${S.phone} &middot; ${S.phone2}<br>
+        <a href="mailto:${S.email}">${S.email}</a><br>
+        Sharjah | Dubai | Abu Dhabi, UAE
+      </div>
+    </div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════
+//  DASHBOARD
+// ══════════════════════════════════════════
+function updateDash(){
+  const invs=db.docs.filter(d=>d.type==='invoice');
+  const tot=invs.reduce((s,d)=>s+d.net,0),paid=invs.filter(d=>d.status==='paid').reduce((s,d)=>s+d.net,0),pend=invs.filter(d=>d.status==='pending').reduce((s,d)=>s+d.net,0),over=invs.filter(d=>d.status==='overdue').reduce((s,d)=>s+d.net,0);
+  document.getElementById('st-total').textContent='AED '+tot.toFixed(2);
+  document.getElementById('st-paid').textContent='AED '+paid.toFixed(2);
+  document.getElementById('st-pend').textContent='AED '+pend.toFixed(2);
+  document.getElementById('st-over').textContent='AED '+over.toFixed(2);
+  document.getElementById('st-ic').textContent=invs.length+' invoice'+(invs.length!==1?'s':'');
+  document.getElementById('st-pc').textContent=invs.filter(d=>d.status==='paid').length+' paid';
+  document.getElementById('st-pp').textContent=invs.filter(d=>d.status==='pending').length+' pending';
+  document.getElementById('st-op').textContent=invs.filter(d=>d.status==='overdue').length+' overdue';
+  const tb=document.getElementById('dashTbl'),rec=db.docs.slice(0,10);
+  if(!rec.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:32px">No documents yet.</td></tr>';return;}
+  tb.innerHTML=rec.map(doc=>{
+    const idx=db.docs.indexOf(doc);
+    const sc={paid:'badge-green',draft:'badge-gold',pending:'badge-amber',overdue:'badge-red',approved:'badge-green'}[doc.status]||'badge-gold';
+    const tc={invoice:'badge-gold',quotation:'badge-amber',return:'badge-red'}[doc.type]||'badge-gold';
+    return`<tr><td class="mono" style="color:var(--gold)">${doc.refNum}</td><td><span class="badge ${tc}">${doc.type}</span></td><td>${doc.clientName}</td><td class="mono">${doc.date}</td><td class="mono">${doc.net.toFixed(2)}</td><td><span class="badge ${sc}">${doc.status}</span></td><td style="display:flex;gap:4px"><button class="btn btn-ghost" style="padding:4px 9px;font-size:11px" onclick="previewById(${idx})">View</button>${doc.type==='invoice'&&doc.status!=='paid'?`<button class="btn btn-success" style="padding:4px 9px;font-size:11px" onclick="markPaid(${idx});updateDash()">Paid</button>`:''}</td></tr>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════
+//  CSV IMPORT
+// ══════════════════════════════════════════
+let impData=[];
+function handleFileDrop(e){e.preventDefault();document.getElementById('dropZone').classList.remove('drag');if(e.dataTransfer.files[0])processFile(e.dataTransfer.files[0]);}
+function handleFileInput(el){if(el.files[0])processFile(el.files[0]);}
+function processFile(f){const r=new FileReader();r.onload=e=>{const rows=e.target.result.trim().split('\n').map(r=>r.split(',').map(c=>c.trim().replace(/^"|"$/g,'')));const h=rows[0].map(x=>x.toLowerCase());impData=rows.slice(1).filter(r=>r.length>=2&&r[0]).map(r=>{const o={};h.forEach((k,i)=>o[k]=r[i]||'');return o;});showImpPreview(h,impData);};r.readAsText(f);}
+function showImpPreview(h,data){document.getElementById('previewHead').innerHTML='<tr>'+h.map(x=>`<th>${x}</th>`).join('')+'</tr>';document.getElementById('previewBody').innerHTML=data.slice(0,5).map(row=>'<tr>'+h.map(k=>`<td>${row[k]||''}</td>`).join('')+'</tr>').join('');document.getElementById('importPreview').style.display='block';document.getElementById('confirmImport').onclick=doImport;}
+function doImport(){let a=0,u=0;impData.forEach(r=>{const sku=r.sku||r.SKU||('IMP'+Date.now()),ei=db.products.findIndex(p=>p.sku===sku),prod={sku,name:r.name||r.Name||'Unknown',category:r.category||r.Category||'Imported',price:parseFloat(r.price||r.Price||0)||0,stock:parseInt(r.stock||r.Stock||0)||0,tax:parseFloat(r.tax||r.Tax||0)||0,unit:r.unit||r.Unit||'Nos'};if(ei>=0){db.products[ei]=prod;u++;}else{db.products.push(prod);a++;}});save();document.getElementById('importPreview').style.display='none';toast(`${a} added, ${u} updated`);showPage('stock');}
+
+updateDash();
+</script>
+</body>
+</html>
